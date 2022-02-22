@@ -17,6 +17,17 @@ task clean(type: Delete) {
     delete rootProject.buildDir
 }
 
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        jcenter()
+        maven { url 'https://maven.google.com' }
+        maven { url 'https://jitpack.io' }
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+    }
+}
+
 ext {
     rxJavaVersion = '2.2.9'
     rxandroidVersion = '2.0.2'

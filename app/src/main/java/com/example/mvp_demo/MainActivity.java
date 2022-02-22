@@ -15,16 +15,21 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         findViewById(R.id.tv_profile).setOnClickListener(this::onClick);
+        startActivity(new Intent(this, ProfileActivity.class));
     }
 
     private void onClick(View view) {
         switch (view.getId()) {
             case R.id.tv_profile:
-                Intent intent = new Intent(this, ProfileActivity.class);
-                startActivity(intent);
+                startActivity(new Intent(this, ProfileActivity.class));
                 break;
             default:
                 break;
         }
     }
 }
+
+
+
+
+

@@ -24,7 +24,7 @@ public class ProfilePresenter implements LifecycleObserver {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(s -> {
-                    profileActivity.onGetProfileSuccess(s);
+                    profileActivity.onGetProfileSuccess(s.toString());
                 }, throwable -> {
                     mLogger.info(throwable.getMessage());
                     profileActivity.onGetProfileError();
