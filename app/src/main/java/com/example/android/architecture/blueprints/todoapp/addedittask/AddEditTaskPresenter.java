@@ -16,26 +16,29 @@
 
 package com.example.android.architecture.blueprints.todoapp.addedittask;
 
-import com.example.android.architecture.blueprints.todoapp.data.Task;
-import com.example.android.architecture.blueprints.todoapp.data.source.TasksDataSource;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.example.android.architecture.blueprints.todoapp.base.BaseMvpFragment;
+import com.example.android.architecture.blueprints.todoapp.base.BasePresenter;
+import com.example.android.architecture.blueprints.todoapp.data.Task;
+import com.example.android.architecture.blueprints.todoapp.data.source.TasksDataSource;
+
+import javax.annotation.Nonnull;
+import javax.inject.Inject;
 
 /**
  * Listens to user actions from the UI ({@link AddEditTaskFragment}), retrieves the data and updates
  * the UI as required.
  */
-public class AddEditTaskPresenter implements AddEditTaskContract.Presenter,
+public class AddEditTaskPresenter extends BasePresenter<AddEditTaskFragment> implements AddEditTaskContract.Presenter,
         TasksDataSource.GetTaskCallback {
 
     @NonNull
     private final TasksDataSource mTasksRepository;
 
-    @NonNull
-    private final AddEditTaskContract.View mAddTaskView;
 
     @Nullable
     private String mTaskId;
@@ -45,19 +48,19 @@ public class AddEditTaskPresenter implements AddEditTaskContract.Presenter,
     /**
      * Creates a presenter for the add/edit view.
      *
-     * @param taskId ID of the task to edit or null for a new task
-     * @param tasksRepository a repository of data for tasks
-     * @param addTaskView the add/edit view
+     * @param taskId                 ID of the task to edit or null for a new task
+     * @param tasksRepository        a repository of data for tasks
      * @param shouldLoadDataFromRepo whether data needs to be loaded or not (for config changes)
      */
-    public AddEditTaskPresenter(@Nullable String taskId, @NonNull TasksDataSource tasksRepository,
-            @NonNull AddEditTaskContract.View addTaskView, boolean shouldLoadDataFromRepo) {
+    @Inject
+    public AddEditTaskPresenter(@Nonnull AddEditTaskFragment addEditTaskFragment, @Nullable String taskId, @NonNull TasksDataSource tasksRepository, boolean shouldLoadDataFromRepo) {
+        super(addEditTaskFragment);
         mTaskId = taskId;
         mTasksRepository = checkNotNull(tasksRepository);
-        mAddTaskView = checkNotNull(addTaskView);
+
         mIsDataMissing = shouldLoadDataFromRepo;
 
-        mAddTaskView.setPresenter(this);
+        getView().setPresenter(this);
     }
 
     @Override
@@ -87,9 +90,9 @@ public class AddEditTaskPresenter implements AddEditTaskContract.Presenter,
     @Override
     public void onTaskLoaded(Task task) {
         // The view may not be able to handle UI updates anymore
-        if (mAddTaskView.isActive()) {
-            mAddTaskView.setTitle(task.getTitle());
-            mAddTaskView.setDescription(task.getDescription());
+        if (getView().isActive()) {
+            getView().setTitle(task.getTitle());
+            getView().setDescription(task.getDescription());
         }
         mIsDataMissing = false;
     }
@@ -97,8 +100,8 @@ public class AddEditTaskPresenter implements AddEditTaskContract.Presenter,
     @Override
     public void onDataNotAvailable() {
         // The view may not be able to handle UI updates anymore
-        if (mAddTaskView.isActive()) {
-            mAddTaskView.showEmptyTaskError();
+        if (getView().isActive()) {
+            getView().showEmptyTaskError();
         }
     }
 
@@ -114,10 +117,10 @@ public class AddEditTaskPresenter implements AddEditTaskContract.Presenter,
     private void createTask(String title, String description) {
         Task newTask = new Task(title, description);
         if (newTask.isEmpty()) {
-            mAddTaskView.showEmptyTaskError();
+            getView().showEmptyTaskError();
         } else {
             mTasksRepository.saveTask(newTask);
-            mAddTaskView.showTasksList();
+            getView().showTasksList();
         }
     }
 
@@ -126,6 +129,6 @@ public class AddEditTaskPresenter implements AddEditTaskContract.Presenter,
             throw new RuntimeException("updateTask() was called but task is new.");
         }
         mTasksRepository.saveTask(new Task(title, description, mTaskId));
-        mAddTaskView.showTasksList(); // After an edit, go back to the list.
+        getView().showTasksList(); // After an edit, go back to the list.
     }
 }

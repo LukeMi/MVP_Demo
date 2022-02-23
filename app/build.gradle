@@ -103,4 +103,10 @@ dependencies {
     androidTestImplementation "androidx.recyclerview:recyclerview:$recyclerViewVersion"
     androidTestImplementation "androidx.appcompat:appcompat:$appCompatVersion"
     androidTestImplementation "com.google.android.material:material:$materialVersion"
+
+    // dagger
+    implementation "com.google.dagger:dagger-android:$rootProject.dagger"
+    implementation "com.google.dagger:dagger-android-support:$rootProject.dagger"
+    annotationProcessor "com.google.dagger:dagger-compiler:$rootProject.dagger"
+    annotationProcessor "com.google.dagger:dagger-android-processor:$rootProject.dagger"
 }

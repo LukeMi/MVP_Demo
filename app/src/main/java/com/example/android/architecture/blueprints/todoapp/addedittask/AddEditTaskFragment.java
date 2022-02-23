@@ -16,6 +16,8 @@
 
 package com.example.android.architecture.blueprints.todoapp.addedittask;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -23,20 +25,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.example.android.architecture.blueprints.todoapp.R;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.example.android.architecture.blueprints.todoapp.R;
+import com.example.android.architecture.blueprints.todoapp.base.BaseMvpFragment;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import dagger.android.AndroidInjector;
+import dagger.android.DaggerFragment;
 
 /**
  * Main UI for the add task screen. Users can enter a task title and description.
  */
-public class AddEditTaskFragment extends Fragment implements AddEditTaskContract.View {
+public class AddEditTaskFragment extends BaseMvpFragment<AddEditTaskPresenter> implements AddEditTaskContract.View {
 
     public static final String ARGUMENT_EDIT_TASK_ID = "EDIT_TASK_ID";
 
@@ -46,12 +48,24 @@ public class AddEditTaskFragment extends Fragment implements AddEditTaskContract
 
     private TextView mDescription;
 
+    boolean shouldLoadDataFromRepo = true;
+
+    public static final String SHOULD_LOAD_DATA_FROM_REPO_KEY = "SHOULD_LOAD_DATA_FROM_REPO_KEY";
+    private String taskId;
+
+
     public static AddEditTaskFragment newInstance() {
         return new AddEditTaskFragment();
     }
 
     public AddEditTaskFragment() {
         // Required empty public constructor
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(SHOULD_LOAD_DATA_FROM_REPO_KEY, mPresenter.isDataMissing());
     }
 
     @Override
@@ -84,16 +98,22 @@ public class AddEditTaskFragment extends Fragment implements AddEditTaskContract
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        // Prevent the presenter from loading data from the repository if this is a config change.
+        if (savedInstanceState != null) {
+            // Data might not have loaded when the config change happen, so we saved the state.
+            shouldLoadDataFromRepo = savedInstanceState.getBoolean(SHOULD_LOAD_DATA_FROM_REPO_KEY);
+        }
         View root = inflater.inflate(R.layout.addtask_frag, container, false);
         mTitle = (TextView) root.findViewById(R.id.add_task_title);
         mDescription = (TextView) root.findViewById(R.id.add_task_description);
+        taskId = getArguments().getString(AddEditTaskFragment.ARGUMENT_EDIT_TASK_ID);
         setHasOptionsMenu(true);
         return root;
     }
 
     @Override
     public void showEmptyTaskError() {
-        Snackbar.make(mTitle, getString(R.string.empty_task_message), Snackbar.LENGTH_LONG).show();
+//        Snackbar.make(mTitle, getString(R.string.empty_task_message), Snackbar.LENGTH_LONG).show();
     }
 
     @Override
@@ -116,4 +136,10 @@ public class AddEditTaskFragment extends Fragment implements AddEditTaskContract
     public boolean isActive() {
         return isAdded();
     }
+
+   /* @Override
+    public AndroidInjector<Object> androidInjector() {
+        DaggerFragment
+        return null;
+    }*/
 }
